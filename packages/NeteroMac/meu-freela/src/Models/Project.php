@@ -4,7 +4,7 @@ namespace NeteroMac\MeuFreela\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\User; // <-- IMPORTANTE: Adicione esta linha
+use App\Models\User;
 
 class Project extends Model
 {

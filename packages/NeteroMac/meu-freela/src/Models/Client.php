@@ -1,10 +1,10 @@
 <?php
 
-namespace Neteromac\MeuFreela\Models;
+namespace NeteroMac\MeuFreela\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\User; // <-- IMPORTANTE: Adicione esta linha
+use App\Models\User;
 
 class Client extends Model
 {
@@ -23,8 +23,6 @@ class Client extends Model
 
     public function projects()
     {
-        // Project está no mesmo namespace, então não precisa do 'use'
-        // mas é uma boa prática adicionar para clareza.
         return $this->hasMany(Project::class);
     }
 }

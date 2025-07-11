@@ -1,13 +1,13 @@
 <?php
 
-// Namespace correto com "M" maiúsculo
 namespace NeteroMac\MeuFreela\Http\Controllers;
 
-// USE STATEMENTS CORRIGIDOS com "M" maiúsculo
 use NeteroMac\MeuFreela\Models\Client;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreClientRequest;
+
 
 class ClientController extends Controller
 {
@@ -22,21 +22,13 @@ class ClientController extends Controller
         return view('meu-freela::clients.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreClientRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:clients',
-            'phone' => 'nullable|string|max:20',
-        ]);
-        $request->user()->clients()->create($validated);
+        $request->user()->clients()->create($request->validated());
         return redirect()->route('clients.index')->with('success', 'Cliente criado com sucesso!');
     }
 
-    public function show(Client $client)
-    {
-        // Geralmente não usamos o show com resource, mas se precisar, está aqui.
-    }
+    public function show(Client $client) {}
 
     public function edit(Client $client)
     {
@@ -48,16 +40,10 @@ class ClientController extends Controller
 
     public function update(Request $request, Client $client)
     {
-        if ($client->user_id !== auth()->id()) {
-            abort(403, 'Acesso Negado');
-        }
+        // A autorização é verificada aqui. Se falhar, um 403 é retornado.
+        $this->authorize('update', $client);
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => ['required', 'email', 'max:255', Rule::unique('clients')->ignore($client->id)],
-            'phone' => 'nullable|string|max:20',
-        ]);
-
+        $validated = $request->validate([/*...*/]);
         $client->update($validated);
 
         return redirect()->route('clients.index')->with('success', 'Cliente atualizado com sucesso!');
@@ -65,12 +51,9 @@ class ClientController extends Controller
 
     public function destroy(Client $client)
     {
-        if ($client->user_id !== auth()->id()) {
-            abort(403, 'Acesso Negado');
-        }
+        $this->authorize('delete', $client);
 
         $client->delete();
-
         return redirect()->route('clients.index')->with('success', 'Cliente excluído com sucesso!');
     }
 }

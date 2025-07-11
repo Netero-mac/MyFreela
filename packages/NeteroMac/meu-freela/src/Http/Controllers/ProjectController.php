@@ -1,9 +1,7 @@
 <?php
 
-// NAMESPACE CORRIGIDO AQUI
 namespace NeteroMac\MeuFreela\Http\Controllers; 
 
-// USE STATEMENTS CORRIGIDOS AQUI
 use NeteroMac\MeuFreela\Models\Project;
 use NeteroMac\MeuFreela\Models\Client;
 use Illuminate\Http\Request;
@@ -11,7 +9,6 @@ use App\Http\Controllers\Controller;
 
 class ProjectController extends Controller
 {
-    // A lógica interna dos métodos continua a mesma...
     
     public function index()
     {
@@ -40,7 +37,7 @@ class ProjectController extends Controller
 
     public function show(Project $project)
     {
-        // Futuramente, para ver detalhes de um projeto
+        
     }
 
     public function edit(Project $project)
