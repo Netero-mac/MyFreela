@@ -34,9 +34,18 @@ class ClientController extends Controller
         return view('meu-freela::clients.create');
     }
 
-    public function store(StoreClientRequest $request)
+    public function store(Request $request)
     {
-        $request->user()->clients()->create($request->validated());
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:clients',
+            'phone' => 'nullable|string|max:20',
+        ]);
+
+        $data = array_merge($validated, ['user_id' => auth()->id()]);
+
+        Client::create($data);
+
         return redirect()->route('clients.index')->with('success', 'Cliente criado com sucesso!');
     }
 
@@ -52,7 +61,6 @@ class ClientController extends Controller
 
     public function update(Request $request, Client $client)
     {
-        // A autorização é verificada aqui. Se falhar, um 403 é retornado.
         $this->authorize('update', $client);
 
         $validated = $request->validate([/*...*/]);
