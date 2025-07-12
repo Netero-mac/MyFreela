@@ -11,9 +11,21 @@ use App\Http\Requests\StoreClientRequest;
 
 class ClientController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $clients = auth()->user()->clients()->latest()->paginate(10);
+        $clientsQuery = auth()->user()->clients();
+
+        // Adiciona a lógica de busca
+        $clientsQuery->when($request->filled('search'), function ($query) use ($request) {
+            $searchTerm = '%' . $request->search . '%';
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('name', 'like', $searchTerm)
+                    ->orWhere('email', 'like', $searchTerm);
+            });
+        });
+
+        $clients = $clientsQuery->latest()->paginate(10);
+
         return view('meu-freela::clients.index', compact('clients'));
     }
 

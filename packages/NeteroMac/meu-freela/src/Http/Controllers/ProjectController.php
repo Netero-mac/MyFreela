@@ -1,6 +1,6 @@
 <?php
 
-namespace NeteroMac\MeuFreela\Http\Controllers; 
+namespace NeteroMac\MeuFreela\Http\Controllers;
 
 use NeteroMac\MeuFreela\Models\Project;
 use NeteroMac\MeuFreela\Models\Client;
@@ -9,10 +9,24 @@ use App\Http\Controllers\Controller;
 
 class ProjectController extends Controller
 {
-    
-    public function index()
+
+    public function index(Request $request)
     {
-        $projects = auth()->user()->projects()->with('client')->latest()->paginate(10);
+        $projectsQuery = auth()->user()->projects()->with('client');
+
+        // Adiciona a lógica de busca
+        $projectsQuery->when($request->filled('search'), function ($query) use ($request) {
+            $searchTerm = '%' . $request->search . '%';
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('title', 'like', $searchTerm)
+                    ->orWhereHas('client', function ($subQuery) use ($searchTerm) {
+                        $subQuery->where('name', 'like', $searchTerm);
+                    });
+            });
+        });
+
+        $projects = $projectsQuery->latest()->paginate(10);
+
         return view('meu-freela::projects.index', compact('projects'));
     }
 
@@ -33,19 +47,16 @@ class ProjectController extends Controller
         $request->user()->projects()->create($validated);
         return redirect()->route('projects.index')->with('success', 'Projeto criado com sucesso!');
     }
-    
 
-    public function show(Project $project)
-    {
-        
-    }
+
+    public function show(Project $project) {}
 
     public function edit(Project $project)
     {
         if ($project->user_id !== auth()->id()) {
             abort(403);
         }
-        
+
         $clients = auth()->user()->clients;
         return view('meu-freela::projects.edit', compact('project', 'clients'));
     }
@@ -73,7 +84,7 @@ class ProjectController extends Controller
         if ($project->user_id !== auth()->id()) {
             abort(403);
         }
-        
+
         $project->delete();
 
         return redirect()->route('projects.index')->with('success', 'Projeto excluído com sucesso!');
