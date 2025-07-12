@@ -5,6 +5,7 @@ namespace NeteroMac\MeuFreela\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
+use App\Enums\ProjectStatus; 
 
 class Project extends Model
 {
@@ -12,12 +13,22 @@ class Project extends Model
 
     protected $fillable = [
         'client_id',
+        'user_id', 
         'title',
         'description',
         'value',
         'status',
         'deadline',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'deadline' => 'date',
+            'status' => ProjectStatus::class,
+        ];
+    }
+
 
     public function client()
     {
