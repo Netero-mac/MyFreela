@@ -16,10 +16,18 @@ class StoreProjectRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
+    // Em app/Http/Requests/StoreProjectRequest.php
+
     public function rules(): array
     {
         return [
-            //
+            'client_id' => [
+                'required',
+                \Illuminate\Validation\Rule::exists('clients', 'id')->where('user_id', auth()->id())
+            ],
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'deadline' => 'nullable|date',
         ];
     }
 }
