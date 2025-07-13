@@ -3,10 +3,10 @@
 namespace App\Providers;
 
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use NeteroMac\MeuFreela\Models\Client;
 use NeteroMac\MeuFreela\Models\Project;
-use NeteroMac\MeuFreela\Models\Client; 
-use App\Policies\ClientPolicy;   
-use App\Policies\ProjectPolicy;   
+use App\Policies\ClientPolicy;
+use App\Policies\ProjectPolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -16,8 +16,7 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
-        // 'App\Models\Model' => 'App\Policies\ModelPolicy',
-        Client::class => ClientPolicy::class, 
+        Client::class => ClientPolicy::class,
         Project::class => ProjectPolicy::class,
     ];
 
@@ -27,7 +26,5 @@ class AuthServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->registerPolicies();
-
-        //
     }
 }

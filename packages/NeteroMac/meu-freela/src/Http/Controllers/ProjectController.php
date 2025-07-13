@@ -2,13 +2,13 @@
 
 namespace NeteroMac\MeuFreela\Http\Controllers;
 
-use NeteroMac\MeuFreela\Models\Project;
-use NeteroMac\MeuFreela\Models\Client;
+use App\Enums\ProjectStatus; // Importe o Enum que vamos criar
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use App\Http\Controllers\Controller;
-// Se você criar o Enum, importe-o aqui. Ex:
-// use App\Enums\ProjectStatus; 
+use Illuminate\Validation\Rules\Enum as EnumRule; // Importe a regra de validação para Enums
+use NeteroMac\MeuFreela\Models\Client;
+use NeteroMac\MeuFreela\Models\Project;
 
 class ProjectController extends Controller
 {
@@ -19,13 +19,12 @@ class ProjectController extends Controller
     {
         $projectsQuery = auth()->user()->projects()->with('client');
 
-        // Lógica de busca refinada
+        // Lógica de busca refinada, incluindo o nome do cliente. Ótima adição!
         $projectsQuery->when($request->filled('search'), function ($query) use ($request) {
             $searchTerm = '%' . $request->search . '%';
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('title', 'like', $searchTerm)
                   ->orWhereHas('client', function ($subQuery) use ($searchTerm) {
-                      // CORREÇÃO AQUI: Usando a variável $searchTerm
                       $subQuery->where('name', 'like', $searchTerm);
                   });
             });
@@ -40,7 +39,8 @@ class ProjectController extends Controller
      */
     public function create()
     {
-        $clients = auth()->user()->clients()->get(); // Pega apenas os clientes do usuário logado
+        // Garante que apenas os clientes do usuário logado sejam listados. Perfeito.
+        $clients = auth()->user()->clients()->get();
         return view('meu-freela::projects.create', compact('clients'));
     }
 
@@ -50,14 +50,13 @@ class ProjectController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            // MELHORIA DE SEGURANÇA: Garante que o client_id pertence ao usuário logado
+            // Excelente validação de segurança! Garante que o client_id pertence ao usuário.
             'client_id' => ['required', Rule::exists('clients', 'id')->where('user_id', auth()->id())],
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'deadline' => 'nullable|date',
         ]);
 
-        // Forma mais limpa e segura de criar, já associando o user_id automaticamente.
         auth()->user()->projects()->create($validated);
 
         return redirect()->route('projects.index')->with('success', 'Projeto criado com sucesso!');
@@ -68,8 +67,8 @@ class ProjectController extends Controller
      */
     public function edit(Project $project)
     {
-        $this->authorize('update', $project); // Autorização via Policy
-        
+        $this->authorize('update', $project);
+
         $clients = auth()->user()->clients()->get();
         return view('meu-freela::projects.edit', compact('project', 'clients'));
     }
@@ -79,10 +78,9 @@ class ProjectController extends Controller
      */
     public function update(Request $request, Project $project)
     {
-        $this->authorize('update', $project); // Autorização via Policy
+        $this->authorize('update', $project);
 
         $validated = $request->validate([
-            // MELHORIA DE SEGURANÇA: Garante que o client_id pertence ao usuário logado
             'client_id' => ['required', Rule::exists('clients', 'id')->where('user_id', auth()->id())],
             'title' => 'required|string|max:255',
             'description' => 'required|string',
@@ -99,8 +97,8 @@ class ProjectController extends Controller
      */
     public function destroy(Project $project)
     {
-        $this->authorize('delete', $project); // Autorização via Policy
-        
+        $this->authorize('delete', $project);
+
         $project->delete();
 
         return redirect()->route('projects.index')->with('success', 'Projeto excluído com sucesso!');
@@ -111,17 +109,15 @@ class ProjectController extends Controller
      */
     public function updateStatus(Request $request, Project $project)
     {
-        $this->authorize('update', $project); // Reutilizando a policy de update
+        $this->authorize('update', $project); // Reutilizar a policy é uma ótima ideia.
 
-        // NOTA: Para a validação de 'status' funcionar com Enums, você precisará
-        // criar o arquivo App\Enums\ProjectStatus.php e usar a regra de validação do Laravel 9+
-        // 'status' => ['required', new \Illuminate\Validation\Rules\Enum(ProjectStatus::class)],
-
-        $request->validate(['status' => ['required', 'string']]);
+        // Validação robusta usando a regra específica para Enums.
+        $validated = $request->validate([
+            'status' => ['required', new EnumRule(ProjectStatus::class)],
+        ]);
         
-        // Esta linha depende do seu Enum. Se não o criou, ela dará erro.
-        // $project->status = ProjectStatus::from($request->status);
-        // $project->save();
+        // Atualização segura usando o valor validado.
+        $project->update($validated);
 
         return back()->with('success', 'Status do projeto atualizado!');
     }

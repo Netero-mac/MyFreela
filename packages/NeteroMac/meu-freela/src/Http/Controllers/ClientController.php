@@ -2,10 +2,10 @@
 
 namespace NeteroMac\MeuFreela\Http\Controllers;
 
-use NeteroMac\MeuFreela\Models\Client;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use App\Http\Controllers\Controller;
+use NeteroMac\MeuFreela\Models\Client;
 
 class ClientController extends Controller
 {
@@ -14,9 +14,11 @@ class ClientController extends Controller
      */
     public function index(Request $request)
     {
+        // Inicia a query a partir do relacionamento para garantir
+        // que o usuário só veja os seus próprios clientes.
         $clientsQuery = auth()->user()->clients();
 
-        // Sua lógica de busca está ótima!
+        // Lógica de busca condicional, elegante e eficiente.
         $clientsQuery->when($request->filled('search'), function ($query) use ($request) {
             $searchTerm = '%' . $request->search . '%';
             $query->where(function ($q) use ($searchTerm) {
@@ -25,6 +27,7 @@ class ClientController extends Controller
             });
         });
 
+        // Traz os resultados mais recentes primeiro e com paginação. Ótimo para a performance!
         $clients = $clientsQuery->latest()->paginate(10);
 
         return view('meu-freela::clients.index', compact('clients'));
@@ -49,7 +52,7 @@ class ClientController extends Controller
             'phone' => 'nullable|string|max:20',
         ]);
 
-        // Forma mais limpa e segura de criar, já associando o user_id automaticamente.
+        // Forma mais limpa e segura de criar, já associando o user_id automaticamente. Perfeito!
         auth()->user()->clients()->create($validated);
 
         return redirect()->route('clients.index')->with('success', 'Cliente criado com sucesso!');
@@ -60,9 +63,9 @@ class ClientController extends Controller
      */
     public function edit(Client $client)
     {
-        // Padronizando a autorização via Policy.
+        // A autorização via Policy é o padrão ideal do Laravel. Excelente!
         $this->authorize('update', $client);
-        
+
         return view('meu-freela::clients.edit', compact('client'));
     }
 
@@ -78,7 +81,7 @@ class ClientController extends Controller
             'email' => ['required', 'email', 'max:255', Rule::unique('clients')->ignore($client->id)],
             'phone' => 'nullable|string|max:20',
         ]);
-        
+
         $client->update($validated);
 
         return redirect()->route('clients.index')->with('success', 'Cliente atualizado com sucesso!');
@@ -92,6 +95,7 @@ class ClientController extends Controller
         $this->authorize('delete', $client);
 
         $client->delete();
+
         return redirect()->route('clients.index')->with('success', 'Cliente excluído com sucesso!');
     }
 }
