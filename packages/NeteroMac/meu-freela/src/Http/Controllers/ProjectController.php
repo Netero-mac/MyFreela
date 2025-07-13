@@ -2,24 +2,23 @@
 
 namespace NeteroMac\MeuFreela\Http\Controllers;
 
-use App\Enums\ProjectStatus; // Importe o Enum que vamos criar
+use App\Enums\ProjectStatus;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Enum as EnumRule; // Importe a regra de validação para Enums
+use Illuminate\Validation\Rules\Enum as EnumRule;
 use NeteroMac\MeuFreela\Models\Client;
 use NeteroMac\MeuFreela\Models\Project;
 
 class ProjectController extends Controller
 {
     /**
-     * Exibe uma lista de projetos do usuário, com busca e paginação.
+     * Exibe uma lista de projetos do usuário.
      */
     public function index(Request $request)
     {
         $projectsQuery = auth()->user()->projects()->with('client');
 
-        // Lógica de busca refinada, incluindo o nome do cliente. Ótima adição!
         $projectsQuery->when($request->filled('search'), function ($query) use ($request) {
             $searchTerm = '%' . $request->search . '%';
             $query->where(function ($q) use ($searchTerm) {
@@ -39,7 +38,6 @@ class ProjectController extends Controller
      */
     public function create()
     {
-        // Garante que apenas os clientes do usuário logado sejam listados. Perfeito.
         $clients = auth()->user()->clients()->get();
         return view('meu-freela::projects.create', compact('clients'));
     }
@@ -50,7 +48,6 @@ class ProjectController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            // Excelente validação de segurança! Garante que o client_id pertence ao usuário.
             'client_id' => ['required', Rule::exists('clients', 'id')->where('user_id', auth()->id())],
             'title' => 'required|string|max:255',
             'description' => 'required|string',
@@ -67,7 +64,8 @@ class ProjectController extends Controller
      */
     public function edit(Project $project)
     {
-        $this->authorize('update', $project);
+        // Verificação manual de autorização
+        abort_if(auth()->user()->id !== $project->user_id, 403, 'This action is unauthorized.');
 
         $clients = auth()->user()->clients()->get();
         return view('meu-freela::projects.edit', compact('project', 'clients'));
@@ -78,7 +76,8 @@ class ProjectController extends Controller
      */
     public function update(Request $request, Project $project)
     {
-        $this->authorize('update', $project);
+        // Verificação manual de autorização
+        abort_if(auth()->user()->id !== $project->user_id, 403, 'This action is unauthorized.');
 
         $validated = $request->validate([
             'client_id' => ['required', Rule::exists('clients', 'id')->where('user_id', auth()->id())],
@@ -97,7 +96,8 @@ class ProjectController extends Controller
      */
     public function destroy(Project $project)
     {
-        $this->authorize('delete', $project);
+        // Verificação manual de autorização
+        abort_if(auth()->user()->id !== $project->user_id, 403, 'This action is unauthorized.');
 
         $project->delete();
 
@@ -109,14 +109,13 @@ class ProjectController extends Controller
      */
     public function updateStatus(Request $request, Project $project)
     {
-        $this->authorize('update', $project); // Reutilizar a policy é uma ótima ideia.
+        // Verificação manual de autorização
+        abort_if(auth()->user()->id !== $project->user_id, 403, 'This action is unauthorized.');
 
-        // Validação robusta usando a regra específica para Enums.
         $validated = $request->validate([
             'status' => ['required', new EnumRule(ProjectStatus::class)],
         ]);
         
-        // Atualização segura usando o valor validado.
         $project->update($validated);
 
         return back()->with('success', 'Status do projeto atualizado!');

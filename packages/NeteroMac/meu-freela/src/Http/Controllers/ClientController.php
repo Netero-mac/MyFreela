@@ -14,11 +14,8 @@ class ClientController extends Controller
      */
     public function index(Request $request)
     {
-        // Inicia a query a partir do relacionamento para garantir
-        // que o usuário só veja os seus próprios clientes.
         $clientsQuery = auth()->user()->clients();
 
-        // Lógica de busca condicional, elegante e eficiente.
         $clientsQuery->when($request->filled('search'), function ($query) use ($request) {
             $searchTerm = '%' . $request->search . '%';
             $query->where(function ($q) use ($searchTerm) {
@@ -27,7 +24,6 @@ class ClientController extends Controller
             });
         });
 
-        // Traz os resultados mais recentes primeiro e com paginação. Ótimo para a performance!
         $clients = $clientsQuery->latest()->paginate(10);
 
         return view('meu-freela::clients.index', compact('clients'));
@@ -48,11 +44,16 @@ class ClientController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:clients',
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                 // Garante que o email seja único para o usuário logado
+                Rule::unique('clients')->where('user_id', auth()->id())
+            ],
             'phone' => 'nullable|string|max:20',
         ]);
 
-        // Forma mais limpa e segura de criar, já associando o user_id automaticamente. Perfeito!
         auth()->user()->clients()->create($validated);
 
         return redirect()->route('clients.index')->with('success', 'Cliente criado com sucesso!');
@@ -63,8 +64,8 @@ class ClientController extends Controller
      */
     public function edit(Client $client)
     {
-        // A autorização via Policy é o padrão ideal do Laravel. Excelente!
-        $this->authorize('update', $client);
+        // Verificação manual de autorização
+        abort_if(auth()->user()->id !== $client->user_id, 403, 'This action is unauthorized.');
 
         return view('meu-freela::clients.edit', compact('client'));
     }
@@ -74,7 +75,8 @@ class ClientController extends Controller
      */
     public function update(Request $request, Client $client)
     {
-        $this->authorize('update', $client);
+        // Verificação manual de autorização
+        abort_if(auth()->user()->id !== $client->user_id, 403, 'This action is unauthorized.');
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -92,7 +94,8 @@ class ClientController extends Controller
      */
     public function destroy(Client $client)
     {
-        $this->authorize('delete', $client);
+        // Verificação manual de autorização
+        abort_if(auth()->user()->id !== $client->user_id, 403, 'This action is unauthorized.');
 
         $client->delete();
 
