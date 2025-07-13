@@ -7,12 +7,12 @@
     "content-hash": "d277c2bbf8fd994661cd43c116a90247",
     "packages": [
         {
-            "name": "Neteromac/meu-freela",
+            "name": "NeteroMac/meu-freela",
             "version": "dev-main",
             "dist": {
                 "type": "path",
                 "url": "packages/NeteroMac/meu-freela",
-                "reference": "467778d6a6b13b6ba771173c1c2f53a67c84bd96"
+                "reference": "3bd2108f1c1575946c71acf4ba77c39f89f555a2"
             },
             "require": {
                 "illuminate/support": "^12.0",
@@ -22,13 +22,13 @@
             "extra": {
                 "laravel": {
                     "providers": [
-                        "Neteromac\\MeuFreela\\MeuFreelaServiceProvider"
+                        "NeteroMac\\MeuFreela\\MeuFreelaServiceProvider"
                     ]
                 }
             },
             "autoload": {
                 "psr-4": {
-                    "Neteromac\\MeuFreela\\": "src/"
+                    "NeteroMac\\MeuFreela\\": "src/"
                 }
             },
             "license": [
@@ -36,7 +36,7 @@
             ],
             "authors": [
                 {
-                    "name": "Neteromac",
+                    "name": "NeteroMac",
                     "email": "marcooantonioo.cardoso@gmail.com"
                 }
             ],

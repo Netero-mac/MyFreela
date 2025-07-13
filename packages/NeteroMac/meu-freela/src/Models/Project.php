@@ -21,14 +21,15 @@ class Project extends Model
         'deadline',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'deadline' => 'date',
-            'status' => ProjectStatus::class,
-        ];
-    }
-
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'status' => ProjectStatus::class, 
+        'deadline' => 'date',             
+    ];
 
     public function client()
     {

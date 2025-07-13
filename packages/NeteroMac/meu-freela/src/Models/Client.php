@@ -1,6 +1,6 @@
 <?php
 
-namespace NeteroMac\MeuFreela\Models;
+namespace NeteroMac\MeuFreela\Models; 
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

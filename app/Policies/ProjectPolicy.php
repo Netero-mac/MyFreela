@@ -2,49 +2,61 @@
 
 namespace App\Policies;
 
-use App\Models\NeteroMac\MeuFreela\Models\Project;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
+use NeteroMac\MeuFreela\Models\Project;
+use Illuminate\Auth\Access\HandlesAuthorization; // Padrão do Laravel
 
 class ProjectPolicy
 {
+    use HandlesAuthorization; // Padrão do Laravel
+
+    /**
+     * Determine whether the user can view any models.
+     * Qualquer usuário logado pode ver a sua própria lista, então retornamos true.
+     */
     public function viewAny(User $user): bool
     {
-        return false;
+        return true;
     }
 
-
+    /**
+     * Determine whether the user can view the model.
+     */
     public function view(User $user, Project $project): bool
     {
-        return false;
+        return $user->id === $project->user_id;
     }
 
-
+    /**
+     * Determine whether the user can create models.
+     * Qualquer usuário logado pode criar um projeto, então retornamos true.
+     */
     public function create(User $user): bool
     {
-        return false;
+        return true;
     }
 
+    /**
+     * Determine whether the user can update the model.
+     */
     public function update(User $user, Project $project): bool
     {
-        return false;
+        return $user->id === $project->user_id;
     }
 
-
+    /**
+     * Determine whether the user can delete the model.
+     */
     public function delete(User $user, Project $project): bool
     {
-        return false;
+        return $user->id === $project->user_id;
     }
 
-
-    public function restore(User $user, Project $project): bool
+    /**
+     * Determine whether the user can update the project status.
+     */
+    public function updateStatus(User $user, Project $project): bool
     {
-        return false;
-    }
-
-
-    public function forceDelete(User $user, Project $project): bool
-    {
-        return false;
+        return $user->id === $project->user_id;
     }
 }
