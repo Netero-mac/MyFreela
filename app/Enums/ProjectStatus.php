@@ -9,7 +9,6 @@ enum ProjectStatus: string
     case COMPLETED = 'Concluído';
     case CANCELED = 'Cancelado';
 
-    // Este é o método que está faltando!
     public function color(): string
     {
         return match ($this) {

@@ -14,6 +14,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('client_id')->constrained()->onDelete('cascade');
             $table->string('title');
+            $table->decimal('value', 10, 2)->nullable();
             $table->text('description');
             $table->string('status')->default(ProjectStatus::PENDING->value);
             $table->date('deadline')->nullable();

@@ -3,10 +3,10 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule; // Adicione esta linha
 
 class UpdateClientRequest extends FormRequest
 {
-    // netero-mac/myfreela/Netero-mac-MyFreela-a4c5b535674ff2ff79ece93d0deb8a90ae4a3614/app/Http/Requests/UpdateClientRequest.php
     public function authorize(): bool
     {
         // Pega o cliente da rota (ex: /clients/{client})
@@ -23,8 +23,19 @@ class UpdateClientRequest extends FormRequest
      */
     public function rules(): array
     {
+        // Pega o cliente que está sendo atualizado a partir da rota
+        $client = $this->route('client');
+
         return [
-            //
+            'name' => 'required|string|max:255',
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                // Garante que o email é único, ignorando o ID do cliente atual
+                Rule::unique('clients')->ignore($client->id),
+            ],
+            'phone' => 'nullable|string|max:20',
         ];
     }
 }
