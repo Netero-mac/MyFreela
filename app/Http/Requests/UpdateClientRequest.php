@@ -3,37 +3,32 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule; // Adicione esta linha
+use Illuminate\Validation\Rule;
 
 class UpdateClientRequest extends FormRequest
 {
+    /**
+     * Determina se o usuário está autorizado a fazer esta requisição.
+     */
     public function authorize(): bool
     {
-        // Pega o cliente da rota (ex: /clients/{client})
-        $client = $this->route('client');
-
-        // Usa a ClientPolicy para verificar se o usuário logado pode atualizar este cliente
-        return $this->user()->can('update', $client);
+        return $this->user()->can('update', $this->client);
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Obtém as regras de validação que se aplicam à requisição.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
-        // Pega o cliente que está sendo atualizado a partir da rota
-        $client = $this->route('client');
-
         return [
             'name' => 'required|string|max:255',
             'email' => [
                 'required',
                 'email',
                 'max:255',
-                // Garante que o email é único, ignorando o ID do cliente atual
-                Rule::unique('clients')->ignore($client->id),
+                Rule::unique('clients')->ignore($this->client->id),
             ],
             'phone' => 'nullable|string|max:20',
         ];
