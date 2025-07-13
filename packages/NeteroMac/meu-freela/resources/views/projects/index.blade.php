@@ -8,7 +8,7 @@
                 <div class="flex">
                     <x-text-input type="search" name="search" class="w-full" placeholder="Buscar por título ou cliente..." :value="request('search')" />
                     <x-primary-button class="ms-2">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg>
                     </x-primary-button>
                 </div>
             </form>
@@ -33,21 +33,26 @@
                         <div class="p-6 flex-grow">
                             <div class="flex justify-between items-start mb-2">
                                 <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ $project->title }}</h3>
+                                
+                                {{-- BLOCO DE AÇÕES CORRIGIDO --}}
                                 <div class="flex space-x-2">
-                                     <a href="{{ route('projects.edit', $project) }}" class="text-gray-400 hover:text-indigo-500"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg></a>
-                                    <form action="{{ route('projects.destroy', $project) }}" method="POST" onsubmit="return confirm('Tem certeza?');"> @csrf @method('DELETE') <button type="submit" class="text-gray-400 hover:text-red-500"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg></button>@csrf @method('DELETE')</form>
+                                    <a href="{{ route('projects.edit', $project) }}" class="text-gray-400 hover:text-indigo-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg>
+                                    </a>
+                                    {{-- Botão para acionar o modal --}}
+                                    <button 
+                                        x-data=""
+                                        x-on:click.prevent="$dispatch('open-modal', 'confirm-project-deletion-{{ $project->id }}')"
+                                        class="text-gray-400 hover:text-red-500"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                                    </button>
                                 </div>
                             </div>
                             
-                            {{-- ======================================================= --}}
-                            {{-- INÍCIO DO CÓDIGO DO BADGE DE STATUS (A PARTE QUE FALTA) --}}
-                            {{-- ======================================================= --}}
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $project->status->color() }}">
                                 {{ $project->status->value }}
                             </span>
-                            {{-- ======================================================= --}}
-                            {{-- FIM DO CÓDIGO DO BADGE DE STATUS --}}
-                            {{-- ======================================================= --}}
 
                             <p class="text-sm text-gray-600 dark:text-gray-400 mt-4 mb-4">{{ Str::limit($project->description, 100) }}</p>
                         </div>
@@ -69,6 +74,32 @@
                             </form>
                         </div>
                     </div>
+
+                    {{-- O Modal de Confirmação para este projeto --}}
+                    <x-modal name="confirm-project-deletion-{{ $project->id }}" :show="$errors->userDeletion->isNotEmpty()" focusable>
+                        <form method="post" action="{{ route('projects.destroy', $project) }}" class="p-6">
+                            @csrf
+                            @method('delete')
+
+                            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                                Tem certeza que deseja excluir o projeto "{{ $project->title }}"?
+                            </h2>
+
+                            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                                Uma vez excluído, todos os seus dados serão permanentemente apagados.
+                            </p>
+
+                            <div class="mt-6 flex justify-end">
+                                <x-secondary-button x-on:click="$dispatch('close')">
+                                    {{ __('Cancelar') }}
+                                </x-secondary-button>
+
+                                <x-danger-button class="ms-3">
+                                    {{ __('Excluir Projeto') }}
+                                </x-danger-button>
+                            </div>
+                        </form>
+                    </x-modal>
                 @empty
                     <div class="col-span-1 md:col-span-2 lg:col-span-3 text-center text-gray-500">Nenhum projeto encontrado.</div>
                 @endforelse
