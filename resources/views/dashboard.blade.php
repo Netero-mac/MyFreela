@@ -85,30 +85,34 @@
                 document.addEventListener('DOMContentLoaded', function() {
                     const ctx = document.getElementById('statusChart').getContext('2d');
                     new Chart(ctx, {
-                        type: 'pie',
+                        type: 'bar', // TIPO DE GRÁFICO: de 'pie' para 'bar'
                         data: {
                             labels: @json($chartLabels),
                             datasets: [{
                                 label: 'Projetos por Status',
                                 data: @json($chartData),
-                                backgroundColor: [
-                                    'rgba(251, 191, 36, 0.7)', // Amarelo (Pendente)
-                                    'rgba(59, 130, 246, 0.7)', // Azul (Em Andamento)
-                                    'rgba(16, 185, 129, 0.7)', // Verde (Concluído)
-                                    'rgba(239, 68, 68, 0.7)', // Vermelho (Cancelado)
-                                ],
-                                borderColor: [
-                                    'rgba(251, 191, 36, 1)',
-                                    'rgba(59, 130, 246, 1)',
-                                    'rgba(16, 185, 129, 1)',
-                                    'rgba(239, 68, 68, 1)',
-                                ],
+                                backgroundColor: @json($chartColors), // Usa as cores que passamos do backend
+                                borderColor: @json($chartColors), // Borda com a mesma cor
                                 borderWidth: 1
                             }]
                         },
                         options: {
                             responsive: true,
                             maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false // Oculta a legenda, pois as labels já estão no eixo X
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true, // Garante que o eixo Y comece no zero
+                                    ticks: {
+                                        // Garante que os ticks sejam apenas números inteiros
+                                        stepSize: 1
+                                    }
+                                }
+                            }
                         }
                     });
                 });

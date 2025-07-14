@@ -18,4 +18,15 @@ enum ProjectStatus: string
             self::CANCELED => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
         };
     }
+
+     public function getChartColor(): string
+    {
+        return match ($this) {
+            self::PENDING => 'rgba(251, 191, 36, 0.7)',     // Amarelo
+            self::IN_PROGRESS => 'rgba(59, 130, 246, 0.7)', // Azul
+            self::COMPLETED => 'rgba(16, 185, 129, 0.7)',   // Verde
+            self::CANCELED => 'rgba(239, 68, 68, 0.7)',    // Vermelho
+        };
+    }
 }
+

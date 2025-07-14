@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use NeteroMac\MeuFreela\Models\Client;
+use App\Http\Requests\UpdateClientRequest;
+use App\Http\Requests\StoreClientRequest;
 
 class ClientController extends Controller
 {
