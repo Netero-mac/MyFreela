@@ -43,11 +43,6 @@ class DashboardController extends Controller
             ->where('deadline', '<=', now()->addDays(15))
             ->sortBy('deadline');
 
-        $statusCounts = $user->projects()
-            ->select('status', DB::raw('count(*) as total'))
-            ->groupBy('status')
-            ->pluck('total', 'status');
-
         return view('dashboard', [
             'totalProjects' => $totalProjects,
             'inProgressProjects' => $inProgressProjects,
@@ -57,8 +52,6 @@ class DashboardController extends Controller
             'aReceber' => $aReceber,
             'recentProjects' => $recentProjects,
             'projetosUrgentes' => $projetosUrgentes,
-            'chartLabels' => $statusCounts->keys(),
-            'chartData' => $statusCounts->values(),
             'chartLabels' => $chartLabels,
             'chartData' => $chartData,
             'chartColors' => $chartColors,

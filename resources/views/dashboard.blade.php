@@ -75,89 +75,108 @@
             <div class="mt-8 bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     <h3 class="text-lg font-semibold mb-4 text-center">Distribuição de Projetos</h3>
-                    <div style="height: 300px;">
-                        <canvas id="statusChart"></canvas>
+                    <div class="relative mx-auto w-1/2">
+                        <div style="height: 300px;">
+                            <canvas id="statusChart"></canvas>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    const ctx = document.getElementById('statusChart').getContext('2d');
-                    new Chart(ctx, {
-                        type: 'bar', // TIPO DE GRÁFICO: de 'pie' para 'bar'
-                        data: {
-                            labels: @json($chartLabels),
-                            datasets: [{
-                                label: 'Projetos por Status',
-                                data: @json($chartData),
-                                backgroundColor: @json($chartColors), // Usa as cores que passamos do backend
-                                borderColor: @json($chartColors), // Borda com a mesma cor
-                                borderWidth: 1
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: {
-                                    display: false // Oculta a legenda, pois as labels já estão no eixo X
-                                }
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        // Verifica se o modo escuro está ativo no sistema do usuário
+                        const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+                        // Define as cores com base no tema
+                        const textColor = isDarkMode ? 'rgba(255, 255, 255, 1)' : 'rgba(55, 65, 81, 1)'; // Cinza claro para modo escuro, cinza escuro para modo claro
+                        const gridColor = isDarkMode ? 'rgba(75, 85, 99, 0.2)' : 'rgba(229, 231, 235, 1)'; // Linhas da grade mais sutis no modo escuro
+
+                        const ctx = document.getElementById('statusChart').getContext('2d');
+                        new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: @json($chartLabels),
+                                datasets: [{
+                                    label: 'Projetos por Status',
+                                    data: @json($chartData),
+                                    backgroundColor: @json($chartColors),
+                                    borderColor: @json($chartColors),
+                                    borderWidth: 1
+                                }]
                             },
-                            scales: {
-                                y: {
-                                    beginAtZero: true, // Garante que o eixo Y comece no zero
-                                    ticks: {
-                                        // Garante que os ticks sejam apenas números inteiros
-                                        stepSize: 1
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        display: false
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        ticks: {
+                                            stepSize: 1,
+                                            color: textColor // [MUDANÇA] Cor do texto do eixo Y
+                                        },
+                                        grid: {
+                                            color: gridColor // [MUDANÇA] Cor da grade do eixo Y
+                                        }
+                                    },
+                                    x: {
+                                        ticks: {
+                                            color: textColor // [MUDANÇA] Cor do texto do eixo X
+                                        },
+                                        grid: {
+                                            color: gridColor // [MUDANÇA] Cor da grade do eixo X
+                                        }
                                     }
                                 }
                             }
-                        }
+                        });
                     });
-                });
-            </script>
+                </script>
 
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
-                    {{-- [MUDANÇA] Adicionada a classe "text-center" para centralizar o título da seção --}}
-                    <h3 class="text-lg font-semibold mb-4 text-center">Projetos Recentes</h3>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                            <thead class="bg-gray-50 dark:bg-gray-700">
-                                <tr>
-                                    {{-- [MUDANÇA] Trocado "text-left" por "text-center" nos cabeçalhos da tabela --}}
-                                    <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Projeto</th>
-                                    <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Cliente</th>
-                                    <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-                                    <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Prazo</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                @forelse ($recentProjects as $project)
-                                <tr>
-                                    {{-- [MUDANÇA] Adicionada a classe "text-center" nas células da tabela --}}
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white text-center">{{ $project->title }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 text-center">{{ $project->client->name }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $project->status->color() }}">
-                                            {{ $project->status->value }}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 text-center">{{ $project->deadline ? $project->deadline->format('d/m/Y') : 'N/D' }}</td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="4" class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">
-                                        Nenhum projeto recente encontrado.
-                                    </td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 text-gray-900 dark:text-gray-100">
+                        {{-- [MUDANÇA] Adicionada a classe "text-center" para centralizar o título da seção --}}
+                        <h3 class="text-lg font-semibold mb-4 text-center">Projetos Recentes</h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead class="bg-gray-50 dark:bg-gray-700">
+                                    <tr>
+                                        {{-- [MUDANÇA] Trocado "text-left" por "text-center" nos cabeçalhos da tabela --}}
+                                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Projeto</th>
+                                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Cliente</th>
+                                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Prazo</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                    @forelse ($recentProjects as $project)
+                                    <tr>
+                                        {{-- [MUDANÇA] Adicionada a classe "text-center" nas células da tabela --}}
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white text-center">{{ $project->title }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 text-center">{{ $project->client->name }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $project->status->color() }}">
+                                                {{ $project->status->value }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 text-center">{{ $project->deadline ? $project->deadline->format('d/m/Y') : 'N/D' }}</td>
+                                    </tr>
+                                    @empty
+                                    <tr>
+                                        <td colspan="4" class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">
+                                            Nenhum projeto recente encontrado.
+                                        </td>
+                                    </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 </x-app-layout>
