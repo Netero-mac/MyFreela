@@ -52,6 +52,7 @@ class ProjectController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'deadline' => 'nullable|date',
+            'value' => 'nullable|numeric|min:0',
         ]);
 
         auth()->user()->projects()->create($validated);
@@ -84,6 +85,7 @@ class ProjectController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'deadline' => 'nullable|date',
+            'value' => 'nullable|numeric|min:0',
         ]);
 
         $project->update($validated);

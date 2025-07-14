@@ -17,9 +17,9 @@
                             <select id="client_id" name="client_id" class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                                 <option value="">Selecione um cliente</option>
                                 @foreach($clients as $client)
-                                    <option value="{{ $client->id }}" {{ old('client_id') == $client->id ? 'selected' : '' }}>
-                                        {{ $client->name }}
-                                    </option>
+                                <option value="{{ $client->id }}" {{ old('client_id') == $client->id ? 'selected' : '' }}>
+                                    {{ $client->name }}
+                                </option>
                                 @endforeach
                             </select>
                             <x-input-error :messages="$errors->get('client_id')" class="mt-2" />
@@ -35,6 +35,13 @@
                             <x-input-label for="description" :value="__('Descrição')" />
                             <textarea id="description" name="description" class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">{{ old('description') }}</textarea>
                             <x-input-error :messages="$errors->get('description')" class="mt-2" />
+                        </div>
+
+                        {{-- [NOVO] Campo para o Valor do Projeto --}}
+                        <div class="mt-4">
+                            <x-input-label for="value" :value="__('Valor do Projeto (R$)')" />
+                            <x-text-input id="value" class="block mt-1 w-full" type="number" name="value" :value="old('value')" step="0.01" placeholder="Ex: 1200.50" />
+                            <x-input-error :messages="$errors->get('value')" class="mt-2" />
                         </div>
 
                         <div class="mt-4">

@@ -17,8 +17,33 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Rota atualizada com dados
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    $user = auth()->user();
+
+    // Contadores para os cards de estatísticas
+    $totalProjects = $user->projects()->count();
+    $inProgressProjects = $user->projects()->where('status', \App\Enums\ProjectStatus::IN_PROGRESS)->count();
+    $completedProjects = $user->projects()->where('status', \App\Enums\ProjectStatus::COMPLETED)->count();
+    $totalClients = $user->clients()->count();
+    $faturado = $user->projects()->where('status', \App\Enums\ProjectStatus::COMPLETED)->sum('value');
+    $aReceber = $user->projects()->whereIn('status', [\App\Enums\ProjectStatus::PENDING, \App\Enums\ProjectStatus::IN_PROGRESS])->sum('value');
+    $projetosUrgentes = $user->projects()->where('status', '!=', \App\Enums\ProjectStatus::COMPLETED)->where('deadline', '!=', null)->where('deadline', '<=', now()->addDays(15))->orderBy('deadline', 'asc')->get();
+    $statusCounts = $user->projects()->select('status', \DB::raw('count(*) as total'))->groupBy('status')->pluck('total', 'status');
+    $recentProjects = $user->projects()->with('client')->latest()->take(5)->get();
+    $chartLabels = $statusCounts->keys();
+    $chartData = $statusCounts->values();
+
+    return view('dashboard', [
+        'totalProjects' => $totalProjects,
+        'inProgressProjects' => $inProgressProjects,
+        'completedProjects' => $completedProjects,
+        'totalClients' => $totalClients,
+        'recentProjects' => $recentProjects,
+        'projetosUrgentes' => $projetosUrgentes,
+        'chartLabels' => $chartLabels,
+        'chartData' => $chartData,
+    ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
@@ -28,4 +53,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
