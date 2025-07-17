@@ -45,6 +45,13 @@
                             <x-input-error :messages="$errors->get('value')" class="mt-2" />
                         </div>
 
+                        <form method="POST" action="{{ route('invoices.store', $project) }}">
+                            @csrf
+                            <x-secondary-button type="submit">
+                                {{ __('Gerar Fatura') }}
+                            </x-secondary-button>
+                        </form>
+
                         <div class="mt-4">
                             <x-input-label for="deadline" :value="__('Prazo Final')" />
                             <x-text-input id="deadline" class="block mt-1 w-full" type="date" name="deadline" :value="old('deadline', $project->deadline)" />
