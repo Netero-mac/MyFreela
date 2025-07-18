@@ -7,6 +7,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use NeteroMac\MeuFreela\Models\Client;
 use NeteroMac\MeuFreela\Models\Project;
+use NeteroMac\MeuFreela\Models\Invoice;
 
 class User extends Authenticatable
 {
@@ -54,5 +55,10 @@ class User extends Authenticatable
     public function projects()
     {
         return $this->hasMany(Project::class);
+    }
+
+     public function invoices()
+    {
+        return $this->hasMany(Invoice::class);
     }
 }

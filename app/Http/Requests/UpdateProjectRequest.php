@@ -30,6 +30,7 @@ class UpdateProjectRequest extends FormRequest
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'deadline' => 'nullable|date',
+            'value' => 'nullable|numeric|min:0', 
         ];
     }
 }
