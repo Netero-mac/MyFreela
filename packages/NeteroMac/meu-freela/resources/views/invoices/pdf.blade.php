@@ -9,8 +9,7 @@
         .header, .footer { text-align: center; }
         .details, .items { width: 100%; margin-top: 20px; border-collapse: collapse; }
         .details th, .details td, .items th, .items td { border: 1px solid #ddd; padding: 8px; }
-        .details th { text-align: left; background-color: #f2f2f2; }
-        .text-right { text-align: right; }
+        .details th { background-color: #f2f2f2; }
     </style>
 </head>
 <body>
@@ -22,15 +21,17 @@
 
         <table class="details">
             <tr>
-                <th style="width: 50%;">Para</th>
-                <th style="width: 50%;">Detalhes da Fatura</th>
+                {{-- [MUDANÇA] Adicionado style="text-align: center;" --}}
+                <th style="width: 50%; text-align: center;">Para</th>
+                <th style="width: 50%; text-align: center;">Detalhes da Fatura</th>
             </tr>
             <tr>
-                <td>
+                {{-- [MUDANÇA] Adicionado style="text-align: center;" --}}
+                <td style="text-align: center;">
                     <strong>{{ $invoice->client->name }}</strong><br>
                     {{ $invoice->client->email }}
                 </td>
-                <td>
+                <td style="text-align: center;">
                     <strong>Nº da Fatura:</strong> {{ $invoice->invoice_number }}<br>
                     <strong>Data de Emissão:</strong> {{ $invoice->created_at->format('d/m/Y') }}<br>
                     <strong>Data de Vencimento:</strong> {{ $invoice->due_date->format('d/m/Y') }}
@@ -41,23 +42,26 @@
         <table class="items">
             <thead>
                 <tr>
-                    <th>Descrição</th>
-                    <th class="text-right">Valor</th>
+                    {{-- [MUDANÇA] Adicionado style="text-align: center;" --}}
+                    <th style="text-align: center;">Descrição</th>
+                    <th style="text-align: center;">Valor</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>
+                    {{-- [MUDANÇA] Adicionado style="text-align: center;" --}}
+                    <td style="text-align: center;">
                         <strong>Projeto:</strong> {{ $invoice->project->title }}<br>
                         <small>{{ Str::limit($invoice->project->description, 150) }}</small>
                     </td>
-                    <td class="text-right">R$ {{ number_format($invoice->total_amount, 2, ',', '.') }}</td>
+                    <td style="text-align: center;">R$ {{ number_format($invoice->total_amount, 2, ',', '.') }}</td>
                 </tr>
             </tbody>
             <tfoot>
                 <tr>
-                    <th class="text-right">Total:</th>
-                    <th class="text-right">R$ {{ number_format($invoice->total_amount, 2, ',', '.') }}</th>
+                    {{-- [MUDANÇA] Adicionado style="text-align: center;" --}}
+                    <th style="text-align: center;">Total:</th>
+                    <th style="text-align: center;">R$ {{ number_format($invoice->total_amount, 2, ',', '.') }}</th>
                 </tr>
             </tfoot>
         </table>
