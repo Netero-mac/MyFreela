@@ -12,8 +12,14 @@ class Invoice extends Model
 
     // Adicione os campos que podem ser preenchidos em massa
     protected $fillable = [
-        'user_id', 'project_id', 'client_id', 'invoice_number',
-        'amount', 'issued_date', 'due_date', 'status'
+        'user_id',
+        'project_id',
+        'client_id',
+        'invoice_number',
+        'total_amount',
+        'paid_amount',
+        'due_date',
+        'status'
     ];
 
     public function user()
