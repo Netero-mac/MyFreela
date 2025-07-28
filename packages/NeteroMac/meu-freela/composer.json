@@ -18,6 +18,11 @@
             "NeteroMac\\MeuFreela\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "NeteroMac\\MeuFreela\\Database\\Factories\\": "database/factories/"
+        }
+    },
     "extra": {
         "laravel": {
             "providers": [
