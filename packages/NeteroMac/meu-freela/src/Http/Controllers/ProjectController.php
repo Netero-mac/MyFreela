@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum as EnumRule;
-use NeteroMac\MeuFreela\Models\Client;
 use NeteroMac\MeuFreela\Models\Project;
 
 class ProjectController extends Controller
@@ -65,7 +64,7 @@ class ProjectController extends Controller
      */
     public function edit(Project $project)
     {
-        // Verificação manual de autorização
+        // Verificação manual de autorização mantida.
         abort_if(auth()->user()->id !== $project->user_id, 403, 'This action is unauthorized.');
 
         $clients = auth()->user()->clients()->get();
@@ -73,24 +72,40 @@ class ProjectController extends Controller
     }
 
     /**
-     * Atualiza um projeto no banco de dados.
+     * [CORRIGIDO] Atualiza um projeto no banco de dados, incluindo a lógica de status.
      */
     public function update(Request $request, Project $project)
     {
-        // Verificação manual de autorização
+        // 1. Verificação manual de autorização mantida.
         abort_if(auth()->user()->id !== $project->user_id, 403, 'This action is unauthorized.');
 
+        // 2. Validação dos dados da requisição.
         $validated = $request->validate([
-            'client_id' => ['required', Rule::exists('clients', 'id')->where('user_id', auth()->id())],
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'deadline' => 'nullable|date',
-            'value' => 'nullable|numeric|min:0',
+            // As regras 'sometimes' garantem que validamos apenas os campos enviados.
+            'client_id' => ['sometimes', 'required', Rule::exists('clients', 'id')->where('user_id', auth()->id())],
+            'title' => 'sometimes|required|string|max:255',
+            'description' => 'sometimes|required|string',
+            'deadline' => 'sometimes|nullable|date',
+            'value' => 'sometimes|nullable|numeric|min:0',
+            'status' => ['sometimes', 'required', new EnumRule(ProjectStatus::class)],
         ]);
+        
+        // 3. [NOVO] Lógica da máquina de estados para a transição de status.
+        if (isset($validated['status'])) {
+            $newStatus = ProjectStatus::tryFrom($validated['status']);
 
+            // Verifica se a transição do estado atual para o novo é permitida.
+            if (!$newStatus || !$project->status->canTransitionTo($newStatus)) {
+                // Se a transição for inválida, retorna com uma mensagem de erro clara.
+                return back()->with('error', 'A transição de status de "' . $project->status->value . '" para "' . $validated['status'] . '" não é permitida.');
+            }
+        }
+        
+        // 4. Se todas as validações passaram, atualiza o projeto.
         $project->update($validated);
 
-        return redirect()->route('projects.index')->with('success', 'Projeto atualizado com sucesso!');
+        // 5. Redireciona de volta para a página anterior com sucesso.
+        return back()->with('success', 'Projeto atualizado com sucesso!');
     }
 
     /**
@@ -98,7 +113,7 @@ class ProjectController extends Controller
      */
     public function destroy(Project $project)
     {
-        // Verificação manual de autorização
+        // Verificação manual de autorização mantida.
         abort_if(auth()->user()->id !== $project->user_id, 403, 'This action is unauthorized.');
 
         $project->delete();
@@ -107,19 +122,7 @@ class ProjectController extends Controller
     }
 
     /**
-     * Atualiza o status de um projeto.
+     * [REMOVIDO] O método 'updateStatus' não é mais necessário.
+     * A sua funcionalidade foi integrada ao método 'update'.
      */
-    public function updateStatus(Request $request, Project $project)
-    {
-        // Verificação manual de autorização
-        abort_if(auth()->user()->id !== $project->user_id, 403, 'This action is unauthorized.');
-
-        $validated = $request->validate([
-            'status' => ['required', new EnumRule(ProjectStatus::class)],
-        ]);
-        
-        $project->update($validated);
-
-        return back()->with('success', 'Status do projeto atualizado!');
-    }
 }

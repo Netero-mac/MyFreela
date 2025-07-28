@@ -13,11 +13,11 @@ class DashboardController extends Controller
     {
         $user = $request->user();
 
-        $projects = $user->projects()->with('client')->get();
+        $totalProjects = $user->projects()->count();
 
-        $totalProjects = $projects->count();
-        $faturado = $projects->where('status', ProjectStatus::COMPLETED)->sum('value');
-        $aReceber = $projects->whereIn('status', [ProjectStatus::PENDING, ProjectStatus::IN_PROGRESS])->sum('value');
+        $faturado = $user->projects()->where('status', ProjectStatus::COMPLETED)->sum('value');
+        
+        $aReceber = $user->projects()->whereIn('status', [ProjectStatus::PENDING, ProjectStatus::IN_PROGRESS])->sum('value');
 
         $statusCounts = $user->projects()
             ->select('status', DB::raw('count(*) as total'))
@@ -34,17 +34,20 @@ class DashboardController extends Controller
             $chartColors[] = $status->getChartColor();
         }
 
-        $recentProjects = $projects->sortByDesc('created_at')->take(5);
-        $projetosUrgentes = $projects->where('status', '!=', ProjectStatus::COMPLETED)
-            ->where('deadline', '!=', null)
+        $recentProjects = $user->projects()->with('client')->latest()->take(5)->get();
+        
+        $projetosUrgentes = $user->projects()
+            ->where('status', '!=', ProjectStatus::COMPLETED)
+            ->whereNotNull('deadline')
             ->where('deadline', '<=', now()->addDays(15))
-            ->sortBy('deadline');
+            ->orderBy('deadline')
+            ->get();
 
         return view('dashboard', [
             'totalProjects' => $totalProjects,
             'inProgressProjects' => $statusCounts[ProjectStatus::IN_PROGRESS->value] ?? 0,
             'completedProjects' => $statusCounts[ProjectStatus::COMPLETED->value] ?? 0,
-            'totalClients' => $user->clients()->count(), 
+            'totalClients' => $user->clients()->count(),
             'aReceber' => $aReceber,
             'recentProjects' => $recentProjects,
             'projetosUrgentes' => $projetosUrgentes,

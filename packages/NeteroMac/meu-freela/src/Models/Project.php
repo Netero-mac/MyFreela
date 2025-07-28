@@ -5,7 +5,7 @@ namespace NeteroMac\MeuFreela\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use NeteroMac\MeuFreela\Enums\ProjectStatus; // 👈 1. Enum agora pertence ao pacote
+use NeteroMac\MeuFreela\Enums\ProjectStatus; 
 
 class Project extends Model
 {
@@ -27,14 +27,14 @@ class Project extends Model
      * @var array
      */
     protected $casts = [
-        'status' => ProjectStatus::class,
+        'status' => \App\Enums\ProjectStatus::class,
         'deadline' => 'date',
     ];
 
     /**
      * Define a relação de pertencimento a um Cliente.
      */
-    public function client(): BelongsTo // 👈 3. Adicione o type hint
+    public function client(): BelongsTo 
     {
         return $this->belongsTo(Client::class);
     }
@@ -42,9 +42,8 @@ class Project extends Model
     /**
      * Define a relação de pertencimento a um Usuário.
      */
-    public function user(): BelongsTo // 👈 3. Adicione o type hint
+    public function user(): BelongsTo 
     {
-        // 👇 2. Forma dinâmica de obter o model de usuário
         return $this->belongsTo(config('auth.providers.users.model'));
     }
 }
