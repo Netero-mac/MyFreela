@@ -1,5 +1,5 @@
 {
-    "name": "NeteroMac/meu-freela",
+    "name": "neteromac/meu-freela",
     "description": "Um pacote para gerenciar clientes e projetos no Laravel.",
     "type": "library",
     "license": "MIT",
