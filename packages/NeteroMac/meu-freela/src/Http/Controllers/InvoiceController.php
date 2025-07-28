@@ -8,67 +8,96 @@ use NeteroMac\MeuFreela\Models\Invoice;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Enums\ProjectStatus; // Enum de status do projeto
+use App\Enums\InvoiceStatus; // Enum de status da fatura
 
 class InvoiceController extends Controller
 {
-    /**
-     * Exibe uma lista de faturas do usuário.
-     */
     public function index(Request $request)
     {
         $invoicesQuery = auth()->user()->invoices()->with('client', 'project');
+
+        // Adicionado filtro por status da fatura
+        $invoicesQuery->when($request->filled('status'), function ($query) use ($request) {
+            $query->where('status', $request->status);
+        });
 
         $invoicesQuery->when($request->filled('search'), function ($query) use ($request) {
             $searchTerm = '%' . $request->search . '%';
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('invoice_number', 'like', $searchTerm)
                     ->orWhereHas('client', function ($subQuery) use ($searchTerm) {
-                        $subQuery->where('name', 'like', $searchTerm);
+                        $subQuery->where('name', 'like', 'searchTerm');
                     })
                     ->orWhereHas('project', function ($subQuery) use ($searchTerm) {
-                        $subQuery->where('title', 'like', $searchTerm);
+                        $subQuery->where('name', 'like', $searchTerm);
                     });
             });
         });
 
         $invoices = $invoicesQuery->latest()->paginate(10);
+        
+        // Enviando os status para o dropdown de filtro da view
+        $statuses = InvoiceStatus::cases();
 
-        return view('meu-freela::invoices.index', compact('invoices'));
+        return view('meu-freela::invoices.index', compact('invoices', 'statuses'));
     }
 
-
-    /**
-     * Cria uma nova fatura para um projeto.
-     */
     public function store(Project $project)
     {
-        // Verificação de autorização
-        abort_if(auth()->user()->id !== $project->user_id, 403);
+        // [MUDANÇA] Verificação de autorização direta
+        abort_if(auth()->user()->id !== $project->user_id, 403, 'Ação não autorizada.');
+
+        // Verificação 1: O projeto deve estar "Concluído"
+        abort_if($project->status !== ProjectStatus::COMPLETED, 422, 'Apenas projetos concluídos podem ser faturados.');
+
+        // Verificação 2: O projeto não pode ter uma fatura existente
+        abort_if($project->invoice()->exists(), 422, 'Este projeto já possui uma fatura gerada.');
 
         $invoice = Invoice::create([
             'project_id' => $project->id,
             'client_id' => $project->client_id,
             'user_id' => $project->user_id,
             'invoice_number' => 'INV-' . strtoupper(Str::random(8)),
-            'total_amount' => $project->value,
-            'due_date' => now()->addDays(15), // Vencimento em 15 dias, por exemplo
-            'status' => 'pending',
+            'total_amount' => $project->price,
+            'due_date' => now()->addDays(15), 
+            'status' => InvoiceStatus::PENDING,
         ]);
 
         return back()->with('success', 'Fatura gerada com sucesso! Nº ' . $invoice->invoice_number);
     }
+    
+    // [NOVO] Método para marcar uma fatura como paga
+    public function markAsPaid(Invoice $invoice)
+    {
+        // [MUDANÇA] Verificação de autorização direta
+        abort_if(auth()->user()->id !== $invoice->user_id, 403, 'Ação não autorizada.');
+        
+        $invoice->update(['status' => InvoiceStatus::PAID]);
 
-    /**
-     * Gera e baixa o PDF de uma fatura.
-     */
+        return back()->with('success', 'Fatura marcada como paga.');
+    }
+
+    // [NOVO] Método para cancelar uma fatura
+    public function cancel(Invoice $invoice)
+    {
+        // [MUDANÇA] Verificação de autorização direta
+        abort_if(auth()->user()->id !== $invoice->user_id, 403, 'Ação não autorizada.');
+
+        // Regra de negócio: não se pode cancelar uma fatura já paga.
+        abort_if($invoice->status === InvoiceStatus::PAID, 422, 'Não é possível cancelar uma fatura que já foi paga.');
+
+        $invoice->update(['status' => InvoiceStatus::CANCELED]);
+
+        return back()->with('success', 'Fatura cancelada com sucesso.');
+    }
+
     public function download(Invoice $invoice)
     {
-        // Verificação de autorização
-        abort_if(auth()->user()->id !== $invoice->user_id, 403);
+        // [MUDANÇA] Verificação de autorização direta
+        abort_if(auth()->user()->id !== $invoice->user_id, 403, 'Ação não autorizada.');
 
-        // Carrega os relacionamentos para usar na view
         $invoice->load('project', 'client', 'user');
-
         $pdf = Pdf::loadView('meu-freela::invoices.pdf', compact('invoice'));
 
         return $pdf->download('fatura-' . $invoice->invoice_number . '.pdf');
