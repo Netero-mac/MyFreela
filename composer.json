@@ -35,7 +35,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\": "tests/"
+            "Tests\\": "tests/",
+            "NeteroMac\\MeuFreela\\Database\\Factories\\": "packages/NeteroMac/meu-freela/database/factories/"
         }
     },
     "scripts": {
