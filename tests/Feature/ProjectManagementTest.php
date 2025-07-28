@@ -22,7 +22,7 @@ class ProjectManagementTest extends TestCase
         $this->actingAs($user) // Autentica o usuário para a requisição
              ->get(route('projects.create')) // Acessa a rota de criação de projeto
              ->assertStatus(200) // Verifica se a página carregou com sucesso
-             ->assertSee('Cadastrar novo projeto'); // Verifica se um texto chave da página está presente
+             ->assertSee('Novo Projeto'); // Verifica se um texto chave da página está presente
     }
 
     #[Test]
