@@ -8,8 +8,8 @@ use NeteroMac\MeuFreela\Models\Invoice;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use App\Enums\ProjectStatus; // Enum de status do projeto
-use App\Enums\InvoiceStatus; // Enum de status da fatura
+use App\Enums\ProjectStatus; 
+use App\Enums\InvoiceStatus; 
 
 class InvoiceController extends Controller
 {
