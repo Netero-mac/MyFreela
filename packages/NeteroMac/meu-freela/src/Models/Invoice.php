@@ -10,7 +10,7 @@ class Invoice extends Model
 {
     use HasFactory;
 
-    // Adicione os campos que podem ser preenchidos em massa
+ 
     protected $fillable = [
         'user_id',
         'project_id',

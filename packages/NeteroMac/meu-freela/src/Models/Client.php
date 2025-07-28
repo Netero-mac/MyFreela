@@ -1,10 +1,11 @@
 <?php
 
-namespace NeteroMac\MeuFreela\Models; 
+namespace NeteroMac\MeuFreela\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\User;
+use Illuminate\Database\Eloquent\Relations\BelongsTo; 
+use Illuminate\Database\Eloquent\Relations\HasMany;   
 
 class Client extends Model
 {
@@ -17,12 +18,22 @@ class Client extends Model
         'phone',
     ];
 
-    public function user()
+    /**
+     * Define a relação de pertencimento a um Usuário.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function user(): BelongsTo 
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(config('auth.providers.users.model'));
     }
 
-    public function projects()
+    /**
+     * Define a relação de um para muitos com os Projetos.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function projects(): HasMany 
     {
         return $this->hasMany(Project::class);
     }

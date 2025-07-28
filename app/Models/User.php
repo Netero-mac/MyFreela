@@ -3,13 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany; 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use NeteroMac\MeuFreela\Contracts\UserInterface; 
 use NeteroMac\MeuFreela\Models\Client;
 use NeteroMac\MeuFreela\Models\Project;
 use NeteroMac\MeuFreela\Models\Invoice;
 
-class User extends Authenticatable
+class User extends Authenticatable implements UserInterface
 {
     use HasFactory, Notifiable;
 
@@ -47,17 +49,17 @@ class User extends Authenticatable
         ];
     }
 
-    public function clients()
+    public function clients(): HasMany
     {
         return $this->hasMany(Client::class);
     }
 
-    public function projects()
+    public function projects(): HasMany
     {
         return $this->hasMany(Project::class);
     }
 
-     public function invoices()
+    public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
     }
