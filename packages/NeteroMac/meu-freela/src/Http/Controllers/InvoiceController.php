@@ -46,7 +46,7 @@ class InvoiceController extends Controller
     public function store(Project $project)
     {
         // [MUDANÇA] Verificação de autorização direta
-        abort_if(auth()->user()->id !== $project->user_id, 403, 'Ação não autorizada.');
+        $this->authorize('update', $project);
 
         // Verificação 1: O projeto deve estar "Concluído"
         abort_if($project->status !== ProjectStatus::COMPLETED, 422, 'Apenas projetos concluídos podem ser faturados.');
@@ -95,7 +95,7 @@ class InvoiceController extends Controller
     public function download(Invoice $invoice)
     {
         // [MUDANÇA] Verificação de autorização direta
-        abort_if(auth()->user()->id !== $invoice->user_id, 403, 'Ação não autorizada.');
+        $this->authorize('download', $invoice);
 
         $invoice->load('project', 'client', 'user');
         $pdf = Pdf::loadView('meu-freela::invoices.pdf', compact('invoice'));

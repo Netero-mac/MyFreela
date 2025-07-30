@@ -34,7 +34,7 @@ class ProjectManagementTest extends TestCase
         $this->actingAs($user); // Autentica o usuário
 
         $projectData = [
-            'name' => 'Criação de Logo',
+            'title' => 'Criação de Logo',
             'description' => 'Descrição detalhada do projeto de logo.',
             'value' => 1500.50,
             'deadline' => '2025-12-31',
@@ -48,7 +48,7 @@ class ProjectManagementTest extends TestCase
         // 3. Assert (Verificação)
         // Verifica se o projeto foi efetivamente salvo no banco de dados com os dados corretos
         $this->assertDatabaseHas('projects', [
-            'name' => 'Criação de Logo',
+            'title' => 'Criação de Logo',
             'user_id' => $user->id,
             'client_id' => $client->id
         ]);

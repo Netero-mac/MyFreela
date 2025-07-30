@@ -66,12 +66,12 @@
                         <p class="flex items-center text-sm text-gray-600 dark:text-gray-300 mb-4"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                             </svg>Cliente: {{ $project->client->name }}</p>
-                        <form action="{{ route('projects.updateStatus', $project) }}" method="POST">
+                        <form action="{{ route('projects.update', $project) }}" method="POST">
                             @csrf
                             @method('PATCH')
                             <div class="flex items-center space-x-2">
                                 <select name="status" class="block w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                    @foreach(App\Enums\ProjectStatus::cases() as $status)
+                                    @foreach(\App\Enums\ProjectStatus::cases() as $status)
                                     <option value="{{ $status->value }}" @selected($project->status === $status)>
                                         {{ $status->value }}
                                     </option>

@@ -5,8 +5,10 @@ namespace App\Providers;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use NeteroMac\MeuFreela\Models\Client;
 use NeteroMac\MeuFreela\Models\Project;
+use NeteroMac\MeuFreela\Models\Invoice;
 use App\Policies\ClientPolicy;
 use App\Policies\ProjectPolicy;
+use App\Policies\InvoicePolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -18,6 +20,7 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         Client::class => ClientPolicy::class,
         Project::class => ProjectPolicy::class,
+        Invoice::class => \App\Policies\InvoicePolicy::class,
     ];
 
     /**
