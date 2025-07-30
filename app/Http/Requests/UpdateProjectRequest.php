@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateProjectRequest extends FormRequest
 {
@@ -13,6 +13,14 @@ class UpdateProjectRequest extends FormRequest
     public function authorize(): bool
     {
         return $this->user()->can('update', $this->project);
+    }
+
+    public function messages(): array
+    {
+        return [
+            'deadline.after_or_equal' => 'A data do prazo final não pode ser uma data no passado.',
+            'value.gt' => 'O valor do projeto, se informado, deve ser maior que zero.',
+        ];
     }
 
     /**
@@ -29,8 +37,8 @@ class UpdateProjectRequest extends FormRequest
             ],
             'title' => 'required|string|max:255',
             'description' => 'required|string',
-            'deadline' => 'nullable|date',
-            'value' => 'nullable|numeric|min:0', 
+            'deadline' => 'nullable|date|after_or_equal:today',
+            'value' => 'nullable|numeric|gt:0' 
         ];
     }
 }

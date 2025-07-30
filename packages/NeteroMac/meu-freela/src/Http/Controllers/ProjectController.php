@@ -50,8 +50,8 @@ class ProjectController extends Controller
             'client_id' => ['required', Rule::exists('clients', 'id')->where('user_id', auth()->id())],
             'title' => 'required|string|max:255',
             'description' => 'required|string',
-            'deadline' => 'nullable|date',
-            'value' => 'nullable|numeric|min:0',
+            'deadline' => 'nullable|date|after_or_equal:today',
+            'value' => 'nullable|numeric|gt:0',
         ]);
 
         auth()->user()->projects()->create($validated);
