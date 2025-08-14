@@ -10,7 +10,7 @@ class DashboardController extends Controller
 {
 
     public function __invoke(Request $request)
-    {
+    {    
         $user = $request->user();
 
         $totalProjects = $user->projects()->count();
