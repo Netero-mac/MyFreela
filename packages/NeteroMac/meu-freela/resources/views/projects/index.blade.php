@@ -33,10 +33,10 @@
                 @forelse ($projects as $project)
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg flex flex-col">
                     <div class="p-6 flex-grow">
+                        {{-- ... (todo o conteúdo do card como nome, status, descrição) ... --}}
                         <div class="flex justify-between items-start mb-2">
                             <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ $project->title }}</h3>
 
-                            {{-- BLOCO DE AÇÕES CORRIGIDO --}}
                             <div class="flex space-x-2">
                                 <a href="{{ route('projects.edit', $project) }}" class="text-gray-400 hover:text-indigo-500">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -44,7 +44,6 @@
                                         <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
                                     </svg>
                                 </a>
-                                {{-- Botão para acionar o modal --}}
                                 <button
                                     x-data=""
                                     x-on:click.prevent="$dispatch('open-modal', 'confirm-project-deletion-{{ $project->id }}')"
@@ -63,7 +62,8 @@
                         <p class="text-sm text-gray-600 dark:text-gray-400 mt-4 mb-4">{{ Str::limit($project->description, 100) }}</p>
                     </div>
                     <div class="bg-gray-50 dark:bg-gray-700/50 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-                        <p class="flex items-center text-sm text-gray-600 dark:text-gray-300 mb-4"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        {{-- ... (Cliente, form de status, botão de fatura) ... --}}
+                         <p class="flex items-center text-sm text-gray-600 dark:text-gray-300 mb-4"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                             </svg>Cliente: {{ $project->client->name }}</p>
                         <form action="{{ route('projects.update', $project) }}" method="POST">
@@ -91,39 +91,38 @@
                         </div>
                         @endif
                     </div>
+
+                    <x-modal name="confirm-project-deletion-{{ $project->id }}" :show="$errors->userDeletion->isNotEmpty()" focusable>
+                        <form method="post" action="{{ route('projects.destroy', $project) }}" class="p-6">
+                            @csrf
+                            @method('delete')
+
+                            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                                Tem certeza que deseja excluir o projeto "{{ $project->title }}"?
+                            </h2>
+
+                            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                                Uma vez excluído, todos os seus dados serão permanentemente apagados.
+                            </p>
+
+                            <div class="mt-6 flex justify-end">
+                                <x-secondary-button x-on:click="$dispatch('close')">
+                                    {{ __('Cancelar') }}
+                                </x-secondary-button>
+
+                                <x-danger-button class="ms-3">
+                                    {{ __('Excluir Projeto') }}
+                                </x-danger-button>
+                            </div>
+                        </form>
+                    </x-modal>
                 </div>
+                @empty
+                    <div class="col-span-1 md:col-span-2 lg:col-span-3 text-center text-gray-500">Nenhum projeto encontrado.</div>
+                @endforelse
+            </div> <div class="mt-8">
+                {{ $projects->appends(request()->query())->links() }}
             </div>
-
-            {{-- O Modal de Confirmação para este projeto --}}
-            <x-modal name="confirm-project-deletion-{{ $project->id }}" :show="$errors->userDeletion->isNotEmpty()" focusable>
-                <form method="post" action="{{ route('projects.destroy', $project) }}" class="p-6">
-                    @csrf
-                    @method('delete')
-
-                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                        Tem certeza que deseja excluir o projeto "{{ $project->title }}"?
-                    </h2>
-
-                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                        Uma vez excluído, todos os seus dados serão permanentemente apagados.
-                    </p>
-
-                    <div class="mt-6 flex justify-end">
-                        <x-secondary-button x-on:click="$dispatch('close')">
-                            {{ __('Cancelar') }}
-                        </x-secondary-button>
-
-                        <x-danger-button class="ms-3">
-                            {{ __('Excluir Projeto') }}
-                        </x-danger-button>
-                    </div>
-                </form>
-            </x-modal>
-            @empty
-            <div class="col-span-1 md:col-span-2 lg:col-span-3 text-center text-gray-500">Nenhum projeto encontrado.</div>
-            @endforelse
         </div>
-        <div class="mt-8">{{ $projects->appends(request()->query())->links() }}</div>
-    </div>
     </div>
 </x-app-layout>
