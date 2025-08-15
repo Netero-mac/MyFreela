@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use NeteroMac\MeuFreela\Models\Project;
 use App\Models\User;
 use NeteroMac\MeuFreela\Models\Invoice;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -23,9 +24,10 @@ class InvoicePolicy
     }
 
     // O usuário pode criar uma fatura?
-    public function create(User $user): bool
+    // [MUDANÇA] A política agora recebe o projeto para verificar a posse.
+    public function create(User $user, Project $project): bool
     {
-        return true; // Todo usuário logado pode criar faturas
+        return $user->id === $project->user_id;
     }
 
     // O usuário pode atualizar uma fatura?

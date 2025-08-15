@@ -27,7 +27,7 @@ class InvoiceController extends Controller
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('invoice_number', 'like', $searchTerm)
                     ->orWhereHas('client', function ($subQuery) use ($searchTerm) {
-                        $subQuery->where('name', 'like', 'searchTerm');
+                        $subQuery->where('name', 'like', $searchTerm);
                     })
                     ->orWhereHas('project', function ($subQuery) use ($searchTerm) {
                         $subQuery->where('name', 'like', $searchTerm);
@@ -45,8 +45,8 @@ class InvoiceController extends Controller
 
     public function store(Project $project)
     {
-        // [MUDANÇA] Verificação de autorização direta
-        $this->authorize('update', $project);
+        // Verificação manual para garantir que o usuário é o dono do projeto.
+        abort_if(auth()->user()->id !== $project->user_id, 403, 'This action is unauthorized.');
 
         // Verificação 1: O projeto deve estar "Concluído"
         abort_if($project->status !== ProjectStatus::COMPLETED, 422, 'Apenas projetos concluídos podem ser faturados.');
@@ -70,8 +70,8 @@ class InvoiceController extends Controller
     // [NOVO] Método para marcar uma fatura como paga
     public function markAsPaid(Invoice $invoice)
     {
-        // [MUDANÇA] Verificação de autorização direta
-        abort_if(auth()->user()->id !== $invoice->user_id, 403, 'Ação não autorizada.');
+        // Verificação manual para garantir que o usuário é o dono da fatura.
+        abort_if(auth()->user()->id !== $invoice->user_id, 403, 'This action is unauthorized.');
         
         $invoice->update(['status' => InvoiceStatus::PAID]);
 
@@ -81,8 +81,8 @@ class InvoiceController extends Controller
     // [NOVO] Método para cancelar uma fatura
     public function cancel(Invoice $invoice)
     {
-        // [MUDANÇA] Verificação de autorização direta
-        abort_if(auth()->user()->id !== $invoice->user_id, 403, 'Ação não autorizada.');
+        // Verificação manual para garantir que o usuário é o dono da fatura.
+        abort_if(auth()->user()->id !== $invoice->user_id, 403, 'This action is unauthorized.');
 
         // Regra de negócio: não se pode cancelar uma fatura já paga.
         abort_if($invoice->status === InvoiceStatus::PAID, 422, 'Não é possível cancelar uma fatura que já foi paga.');
@@ -94,8 +94,8 @@ class InvoiceController extends Controller
 
     public function download(Invoice $invoice)
     {
-        // [MUDANÇA] Verificação de autorização direta
-        $this->authorize('download', $invoice);
+        // Verificação manual para garantir que o usuário é o dono da fatura.
+        abort_if(auth()->user()->id !== $invoice->user_id, 403, 'This action is unauthorized.');
 
         $invoice->load('project', 'client', 'user');
         $pdf = Pdf::loadView('meu-freela::invoices.pdf', compact('invoice'));

@@ -64,7 +64,7 @@ class ProjectController extends Controller
      */
     public function edit(Project $project)
     {
-        // Verificação manual de autorização mantida.
+        // Verificação manual de autorização.
         abort_if(auth()->user()->id !== $project->user_id, 403, 'This action is unauthorized.');
 
         $clients = auth()->user()->clients()->get();
@@ -76,7 +76,7 @@ class ProjectController extends Controller
      */
     public function update(Request $request, Project $project)
     {
-        // 1. Verificação manual de autorização mantida.
+        // 1. Verificação manual de autorização.
         abort_if(auth()->user()->id !== $project->user_id, 403, 'This action is unauthorized.');
 
         // 2. Validação dos dados da requisição.
@@ -113,7 +113,7 @@ class ProjectController extends Controller
      */
     public function destroy(Project $project)
     {
-        // Verificação manual de autorização mantida.
+        // Verificação manual de autorização.
         abort_if(auth()->user()->id !== $project->user_id, 403, 'This action is unauthorized.');
 
         $project->delete();

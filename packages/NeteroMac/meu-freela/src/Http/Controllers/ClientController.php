@@ -66,7 +66,7 @@ class ClientController extends Controller
      */
     public function edit(Client $client)
     {
-        // Verificação manual de autorização
+        // Verificação manual de autorização.
         abort_if(auth()->user()->id !== $client->user_id, 403, 'This action is unauthorized.');
 
         return view('meu-freela::clients.edit', compact('client'));
@@ -77,7 +77,7 @@ class ClientController extends Controller
      */
     public function update(Request $request, Client $client)
     {
-        // Verificação manual de autorização
+        // Verificação manual de autorização.
         abort_if(auth()->user()->id !== $client->user_id, 403, 'This action is unauthorized.');
 
         $validated = $request->validate([
@@ -96,7 +96,7 @@ class ClientController extends Controller
      */
     public function destroy(Client $client)
     {
-        // Verificação manual de autorização
+        // Verificação manual de autorização.
         abort_if(auth()->user()->id !== $client->user_id, 403, 'This action is unauthorized.');
 
         $client->delete();
