@@ -59,7 +59,7 @@ class InvoiceController extends Controller
             'client_id' => $project->client_id,
             'user_id' => $project->user_id,
             'invoice_number' => 'INV-' . strtoupper(Str::random(8)),
-            'total_amount' => $project->price,
+            'total_amount' => $project->value,
             'due_date' => now()->addDays(15), 
             'status' => InvoiceStatus::PENDING,
         ]);

@@ -5,6 +5,7 @@ namespace NeteroMac\MeuFreela\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use NeteroMac\MeuFreela\Enums\ProjectStatus; 
 
 class Project extends Model
@@ -45,5 +46,13 @@ class Project extends Model
     public function user(): BelongsTo 
     {
         return $this->belongsTo(config('auth.providers.users.model'));
+    }
+
+    /**
+     *  Define a relação de um-para-um com a Fatura.
+     */
+    public function invoice(): HasOne
+    {
+        return $this->hasOne(Invoice::class);
     }
 }
