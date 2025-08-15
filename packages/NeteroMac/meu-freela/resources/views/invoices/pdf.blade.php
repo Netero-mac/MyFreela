@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-a">
+    <meta charset="UTF-8">
     <title>Fatura {{ $invoice->invoice_number }}</title>
     <style>
         body { font-family: sans-serif; line-height: 1.5; }

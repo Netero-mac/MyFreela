@@ -10,6 +10,18 @@ class Invoice extends Model
 {
     use HasFactory;
 
+    /**
+     * Converte atributos para tipos de dados nativos.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'due_date' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'total_amount' => 'decimal:2', 
+    ];
+
  
     protected $fillable = [
         'user_id',
