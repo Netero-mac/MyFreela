@@ -5,6 +5,7 @@ namespace NeteroMac\MeuFreela\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
+use App\Enums\InvoiceStatus;
 
 class Invoice extends Model
 {
@@ -17,9 +18,8 @@ class Invoice extends Model
      */
     protected $casts = [
         'due_date' => 'datetime',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
         'total_amount' => 'decimal:2', 
+        'status' => InvoiceStatus::class,
     ];
 
  

@@ -52,7 +52,7 @@ class InvoiceController extends Controller
 
         if ($request->hasFile('invoice_pdf')) {
             // Gera um nome de arquivo único e armazena o PDF
-            $path = $request->file('invoice_pdf')->store('invoices', 'private');
+            $path = $request->file('invoice_pdf')->store('invoices', 'local');
 
             // Cria o registro no banco de dados
             $project->invoice()->create([
@@ -95,17 +95,23 @@ class InvoiceController extends Controller
 
     public function download(Invoice $invoice)
     {
-        // Garante que o usuário só pode baixar sua própria fatura
+        // 1. Garante que o usuário só pode baixar sua própria fatura
         abort_if($invoice->user_id !== auth()->id(), 403);
 
-        // Verifica se o arquivo existe no storage
-        if (Storage::disk('private')->exists($invoice->file_path)) {
-            // Retorna o arquivo para download
-            return Storage::disk('private')->download($invoice->file_path, 'fatura-' . $invoice->project->id . '.pdf');
+        // 2. Verifica se o caminho do arquivo existe no registro do banco
+        abort_if(is_null($invoice->file_path), 404, 'Nenhum arquivo anexado a esta fatura.');
+
+        // 3. Verifica se o arquivo físico existe no storage
+        if (!Storage::disk('local')->exists($invoice->file_path)) {
+            abort(404, 'Arquivo não encontrado no servidor.');
         }
 
-        // Caso o arquivo não seja encontrado
-        abort(404, 'Arquivo não encontrado.');
+        // 4. Retorna o arquivo para download
+        // O nome do arquivo será algo como "fatura-projeto-123.pdf"
+        $projectName = Str::slug($invoice->project->title ?? 'projeto');
+        $fileName = "fatura-{$projectName}-{$invoice->id}.pdf";
+
+        return Storage::disk('local')->download($invoice->file_path, $fileName);
     }
 
      public function create(Project $project)
