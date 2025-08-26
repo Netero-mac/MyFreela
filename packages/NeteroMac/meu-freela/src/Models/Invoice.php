@@ -31,7 +31,8 @@ class Invoice extends Model
         'total_amount',
         'paid_amount',
         'due_date',
-        'status'
+        'status',
+        'file_path',
     ];
 
     public function user()

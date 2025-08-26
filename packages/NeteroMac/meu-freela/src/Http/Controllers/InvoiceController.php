@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Enums\ProjectStatus; 
 use App\Enums\InvoiceStatus; 
+use Illuminate\Support\Facades\Storage; 
 
 class InvoiceController extends Controller
 {
@@ -43,28 +44,28 @@ class InvoiceController extends Controller
         return view('meu-freela::invoices.index', compact('invoices', 'statuses'));
     }
 
-    public function store(Project $project)
+     public function store(Request $request, Project $project)
     {
-        // Verificação manual para garantir que o usuário é o dono do projeto.
-        abort_if(auth()->user()->id !== $project->user_id, 403, 'This action is unauthorized.');
-
-        // Verificação 1: O projeto deve estar "Concluído"
-        abort_if($project->status !== ProjectStatus::COMPLETED, 422, 'Apenas projetos concluídos podem ser faturados.');
-
-        // Verificação 2: O projeto não pode ter uma fatura existente
-        abort_if($project->invoice()->exists(), 422, 'Este projeto já possui uma fatura gerada.');
-
-        $invoice = Invoice::create([
-            'project_id' => $project->id,
-            'client_id' => $project->client_id,
-            'user_id' => $project->user_id,
-            'invoice_number' => 'INV-' . strtoupper(Str::random(8)),
-            'total_amount' => $project->value,
-            'due_date' => now()->addDays(15), 
-            'status' => InvoiceStatus::PENDING,
+        $request->validate([
+            'invoice_pdf' => 'required|mimes:pdf|max:2048', // Valida se é um PDF de até 2MB
         ]);
 
-        return back()->with('success', 'Fatura gerada com sucesso! Nº ' . $invoice->invoice_number);
+        if ($request->hasFile('invoice_pdf')) {
+            // Gera um nome de arquivo único e armazena o PDF
+            $path = $request->file('invoice_pdf')->store('invoices', 'private');
+
+            // Cria o registro no banco de dados
+            $project->invoice()->create([
+                'user_id' => auth()->id(),
+                'client_id' => $project->client_id,
+                'status' => \App\Enums\InvoiceStatus::PENDING, // Status inicial
+                'file_path' => $path, // Salva o caminho do arquivo
+            ]);
+
+            return redirect()->route('invoices.index')->with('success', 'Fatura anexada com sucesso!');
+        }
+
+        return back()->with('error', 'Ocorreu um erro ao anexar a fatura.');
     }
     
     // [NOVO] Método para marcar uma fatura como paga
@@ -94,12 +95,21 @@ class InvoiceController extends Controller
 
     public function download(Invoice $invoice)
     {
-        // Verificação manual para garantir que o usuário é o dono da fatura.
-        abort_if(auth()->user()->id !== $invoice->user_id, 403, 'This action is unauthorized.');
+        // Garante que o usuário só pode baixar sua própria fatura
+        abort_if($invoice->user_id !== auth()->id(), 403);
 
-        $invoice->load('project', 'client', 'user');
-        $pdf = Pdf::loadView('meu-freela::invoices.pdf', compact('invoice'));
+        // Verifica se o arquivo existe no storage
+        if (Storage::disk('private')->exists($invoice->file_path)) {
+            // Retorna o arquivo para download
+            return Storage::disk('private')->download($invoice->file_path, 'fatura-' . $invoice->project->id . '.pdf');
+        }
 
-        return $pdf->download('fatura-' . $invoice->invoice_number . '.pdf');
+        // Caso o arquivo não seja encontrado
+        abort(404, 'Arquivo não encontrado.');
+    }
+
+     public function create(Project $project)
+    {
+        return view('meu-freela::invoices.create', compact('project'));
     }
 }

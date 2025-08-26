@@ -20,4 +20,7 @@ Route::middleware(['web', 'auth'])->group(function () {
     
     // 3. Rota para download (continua igual)
     Route::get('invoices/{invoice}/download', [InvoiceController::class, 'download'])->name('invoices.download');
+
+    Route::get('/projects/{project}/invoices/create', [InvoiceController::class, 'create'])->name('invoices.create');
+
 });

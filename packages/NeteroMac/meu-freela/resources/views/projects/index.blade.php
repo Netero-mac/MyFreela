@@ -33,7 +33,7 @@
                 @forelse ($projects as $project)
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg flex flex-col">
                     <div class="p-6 flex-grow">
-                        {{-- ... (todo o conteúdo do card como nome, status, descrição) ... --}}
+                        {{-- Conteúdo do card: nome, status, descrição --}}
                         <div class="flex justify-between items-start mb-2">
                             <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ $project->title }}</h3>
 
@@ -62,7 +62,7 @@
                         <p class="text-sm text-gray-600 dark:text-gray-400 mt-4 mb-4">{{ Str::limit($project->description, 100) }}</p>
                     </div>
                     <div class="bg-gray-50 dark:bg-gray-700/50 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-                        {{-- ... (Cliente, form de status, botão de fatura) ... --}}
+                        {{-- Cliente, form de status, botão de fatura --}}
                          <p class="flex items-center text-sm text-gray-600 dark:text-gray-300 mb-4"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                             </svg>Cliente: {{ $project->client->name }}</p>
@@ -80,16 +80,17 @@
                                 <button type="submit" class="text-xs text-white bg-indigo-600 hover:bg-indigo-700 rounded-md px-3 py-2">Salvar</button>
                             </div>
                         </form>
-                        @if ($project->status === \App\Enums\ProjectStatus::COMPLETED)
+                        
+                        {{-- ===== BLOCO ALTERADO ===== --}}
+                        @if ($project->status === \App\Enums\ProjectStatus::COMPLETED && !$project->invoice)
                         <div class="mt-4">
-                            <form method="POST" action="{{ route('invoices.store', $project) }}">
-                                @csrf
-                                <x-secondary-button type="submit" class="w-full justify-center">
-                                    {{ __('Gerar Fatura') }}
-                                </x-secondary-button>
-                            </form>
+                            <a href="{{ route('invoices.create', $project) }}" class="w-full inline-flex items-center justify-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-500 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150">
+                                {{ __('Anexar Fatura') }}
+                            </a>
                         </div>
                         @endif
+                        {{-- ===== FIM DO BLOCO ALTERADO ===== --}}
+
                     </div>
 
                     <x-modal name="confirm-project-deletion-{{ $project->id }}" :show="$errors->userDeletion->isNotEmpty()" focusable>
@@ -120,7 +121,8 @@
                 @empty
                     <div class="col-span-1 md:col-span-2 lg:col-span-3 text-center text-gray-500">Nenhum projeto encontrado.</div>
                 @endforelse
-            </div> <div class="mt-8">
+            </div>
+             <div class="mt-8">
                 {{ $projects->appends(request()->query())->links() }}
             </div>
         </div>
